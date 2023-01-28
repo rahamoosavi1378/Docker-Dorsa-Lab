@@ -1,0 +1,56 @@
+version: "3.1"
+services:
+
+  apache-php:
+    build: ./apache/
+    container_name: Lab_Apache-php
+    ports:
+      - 80:80
+    tty: true
+    stdin_open: true
+    volumes:
+      - type: bind
+        source: ./lab
+        target: /var/www/html
+    restart: always
+    depends_on:
+      - sql
+
+  sql:
+    build: ./db/
+    container_name: Lab_sql
+    expose:
+      - 3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dorsalab
+    restart: always
+    tty: true
+    stdin_open: true
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8888:8080
+    depends_on:
+      - sql
+
+  centos:
+    build: ./centos/
+    container_name: Lab_Centos
+    ports:
+      - 2222:22
+      - 8080:80
+      - 443:443
+    tty: true
+    stdin_open: true
+    volumes:
+      - type: bind
+        source: ./lab
+        target: /var/www/html
+    restart: always
+    depends_on:
+      - apache-php
+      - sql
+      - adminer
